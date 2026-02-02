@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Will you be my Valentine? 💌</title>
+  <style>
+    :root {
+      --bg1: #ff9a9e;
+      --bg2: #fad0c4;
+      --card: rgba(255, 255, 255, 0.78);
+      --text: #1b1b1f;
+      --muted: rgba(27, 27, 31, 0.65);
+      --yes: #22c55e;
+      --yes2: #16a34a;
+      --no: #ef4444;
+      --shadow: 0 18px 50px rgba(0,0,0,0.16);
+      --ring: 0 0 0 4px rgba(34,197,94,.25);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      overflow: hidden;
+      background: radial-gradient(1200px 800px at 20% 15%, rgba(255,255,255,.55), rgba(255,255,255,0)),
+                  linear-gradient(135deg, var(--bg1), var(--bg2));
+    }
+
+    /* Floating hearts */
+    .hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 0.9;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.08));
+    }
+    .heart {
+      position: absolute;
+      width: 16px; height: 16px;
+      transform: rotate(45deg);
+      background: rgba(255, 55, 120, .35);
+      border-radius: 3px;
+      animation: floatUp linear infinite;
+    }
+    .heart:before, .heart:after {
+      content: "";
+      position: absolute;
+      width: 16px; height: 16px;
+      background: inherit;
+      border-radius: 50%;
+    }
+    .heart:before { left: -8px; top: 0; }
+    .heart:after  { left: 0; top: -8px; }
+
+    @keyframes floatUp {
+      from { transform: translateY(110vh) rotate(45deg); opacity: 0; }
+      10% { opacity: 0.9; }
+      to   { transform: translateY(-30vh) rotate(45deg); opacity: 0; }
+    }
+
+    /* Layout */
+    .wrap {
+      height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .card {
+      width: min(720px, 96vw);
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.45);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      overflow: hidden;
+      position: relative;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+    .badge {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(0,0,0,.05);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: #ff3b7f;
+      box-shadow: 0 0 0 4px rgba(255,59,127,.18);
+    }
+
+    .content {
+      padding: 28px 24px 18px;
+      display: grid;
+      gap: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .stage {
+      position: relative;
+      height: 220px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.6);
+      border: 1px solid rgba(0,0,0,.06);
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
+    }
+
+    .ctaRow {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 18px 22px;
+      position: relative;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 14px 20px;
+      font-size: 16px;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease, opacity .12s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:focus-visible { outline: none; box-shadow: var(--ring); }
+
+    .yes {
+      background: linear-gradient(180deg, var(--yes), var(--yes2));
+      color: white;
+      box-shadow: 0 14px 30px rgba(34,197,94,.25);
+    }
+    .yes:hover { transform: translateY(-1px) scale(1.02); }
+    .yes:active { transform: translateY(0) scale(0.99); }
+
+    .no {
+      position: absolute; /* we move this around */
+      left: 50%;
+      top: 62%;
+      transform: translate(-50%, -50%);
+      background: rgba(239,68,68,.12);
+      color: #b91c1c;
+      border: 1px solid rgba(185,28,28,.25);
+      box-shadow: 0 10px 18px rgba(239,68,68,.10);
+      padding: 12px 18px;
+      font-weight: 800;
+    }
+    .no:hover { transform: translate(-50%, -50%) scale(1.02); }
+
+    .footer {
+      padding: 0 22px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.65);
+      color: rgba(0,0,0,.65);
+    }
+
+    /* Modal */
+    .modalBackdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 20;
+    }
+    .modal {
+      width: min(520px, 96vw);
+      border-radius: 24px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.6);
+      box-shadow: 0 22px 70px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+    .modalHeader {
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .modalHeader h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+    .modalBody {
+      padding: 18px 20px 6px;
+      color: rgba(0,0,0,.7);
+      line-height: 1.45;
+    }
+    .modalActions {
+      padding: 14px 20px 18px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .ghost {
+      background: rgba(0,0,0,.06);
+      color: rgba(0,0,0,.7);
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: none;
+    }
+
+    /* Confetti */
+    canvas#confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 30;
+      display: none;
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 480px) {
+      .stage { height: 240px; }
+      .ctaRow { padding-bottom: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+
+  <div class="hearts" id="hearts"></div>
+
+  <div class="wrap">
+    <main class="card" aria-live="polite">
+      <div class="topbar">
+        <div class="badge"><span class="dot"></span> Valentine Mode</div>
+        <div class="badge" id="status">💗 ready</div>
+      </div>
+
+      <section class="content">
+        <div>
+          <h1 id="title">Will you be my Valentine? 💌</h1>
+          <p class="sub" id="subtitle">
+            I made a tiny website just to ask you this… and yes, I’m a little dramatic.
+          </p>
+        </div>
+
+        <div class="stage" id="stage" aria-label="Valentine choice area">
+          <div class="ctaRow" style="height:100%;">
+            <button class="yes" id="yesBtn" type="button">Yes 😍</button>
+            <button class="no" id="noBtn" type="button" aria-label="No (hard to click)">No 🙃</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer">
+        <div class="hint">Tip: press <span class="kbd">Y</span> to say yes faster</div>
+        <div class="hint">Made with 💘</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div class="modalBackdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modalHeader">
+        <h2 id="modalTitle">YAY! 🎉</h2>
+        <button class="ghost" id="closeModal" type="button" aria-label="Close">✕</button>
+      </div>
+      <div class="modalBody" id="modalBody">
+        You just made my whole day. 💖<br/>
+        Screenshot this and send it to me 😄
+      </div>
+      <div class="modalActions">
+        <button class="ghost" id="copyBtn" type="button">Copy cute text</button>
+        <button class="yes" id="okBtn" type="button">Okay 🥰</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Hearts background ----------
+    (function spawnHearts(){
+      const hearts = document.getElementById('hearts');
+      const count = 18;
+      for (let i = 0; i < count; i++) {
+        const h = document.createElement('div');
+        h.className = 'heart';
+        const left = Math.random() * 100;
+        const delay = Math.random() * 10;
+        const dur = 10 + Math.random() * 16;
+        const size = 10 + Math.random() * 18;
+        h.style.left = left + 'vw';
+        h.style.animationDelay = delay + 's';
+        h.style.animationDuration = dur + 's';
+        h.style.width = size + 'px';
+        h.style.height = size + 'px';
+        h.style.opacity = (0.25 + Math.random() * 0.35).toFixed(2);
+        h.style.background = `rgba(255, 59, 127, ${0.22 + Math.random()*0.25})`;
+        hearts.appendChild(h);
+      }
+    })();
+
+    // ---------- "No" button dodge logic ----------
+    const stage = document.getElementById('stage');
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const statusEl = document.getElementById('status');
+
+    let dodges = 0;
+    let lastMoveAt = 0;
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function moveNoButton(awayFromX, awayFromY) {
+      const now = Date.now();
+      // Throttle moves a bit to keep it smooth
+      if (now - lastMoveAt < 110) return;
+      lastMoveAt = now;
+
+      const stageRect = stage.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+
+      // Available space (keep padding so it doesn't stick to edges)
+      const pad = 14;
+      const maxX = stageRect.width - btnRect.width - pad;
+      const maxY = stageRect.height - btnRect.height - pad;
+
+      // current button position relative to stage
+      const currentLeft = btnRect.left - stageRect.left;
+      const currentTop  = btnRect.top - stageRect.top;
+
+      // pick a new position
+      // If we know where the pointer is, push away from it; else random.
+      let targetX, targetY;
+
+      if (typeof awayFromX === 'number' && typeof awayFromY === 'number') {
+        const dx = currentLeft + btnRect.width/2 - awayFromX;
+        const dy = currentTop + btnRect.height/2 - awayFromY;
+
+        // push direction with randomness
+        const push = 120 + Math.random() * 120;
+        targetX = currentLeft + (dx === 0 ? (Math.random()-0.5) : dx/Math.abs(dx)) * push + (Math.random()-0.5)*60;
+        targetY = currentTop  + (dy === 0 ? (Math.random()-0.5) : dy/Math.abs(dy)) * push + (Math.random()-0.5)*60;
+      } else {
+        targetX = Math.random() * maxX;
+        targetY = Math.random() * maxY;
+      }
+
+      targetX = clamp(targetX, pad, maxX);
+      targetY = clamp(targetY, pad, maxY);
+
+      // Apply absolute position inside stage
+      noBtn.style.left = targetX + 'px';
+      noBtn.style.top = targetY + 'px';
+      noBtn.style.transform = 'translate(0,0)';
+
+      dodges++;
+      const messages = [
+        "😅 nice try",
+        "🙈 not today",
+        "🏃‍♂️ too slow",
+        "😏 you sure?",
+        "💨 zoom!",
+        "🫣 hehe"
+      ];
+      statusEl.textContent = messages[dodges % messages.length];
+    }
+
+    // Trigger dodge when pointer approaches or tries to click/tap
+    function pointerXY(e, rect){
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      return {x, y};
+    }
+
+    stage.addEventListener('mousemove', (e) => {
+      const stageRect = stage.getBoundingClientRect();
+      const {x, y} = pointerXY(e, stageRect);
+
+      const btnRect = noBtn.getBoundingClientRect();
+      const bx = (btnRect.left - stageRect.left) + btnRect.width/2;
+      const by = (btnRect.top - stageRect.top) + btnRect.height/2;
+
+      const dist = Math.hypot(bx - x, by - y);
+
+      // If cursor gets close, dodge
+      if (dist < 120) moveNoButton(x, y);
+    }, { passive: true });
+
+    // Mobile: dodge on touchstart near the "No" button area
+    stage.addEventListener('touchstart', (e) => {
+      const stageRect = stage.getBoundingClientRect();
+      const {x, y} = pointerXY(e, stageRect);
+
+      const btnRect = noBtn.getBoundingClientRect();
+      const bx = (btnRect.left - stageRect.left) + btnRect.width/2;
+      const by = (btnRect.top - stageRect.top) + btnRect.height/2;
+
+      const dist = Math.hypot(bx - x, by - y);
+      if (dist < 160) {
+        e.preventDefault();
+        moveNoButton(x, y);
+      }
+    }, { passive: false });
+
+    // Also dodge when user tries to hover/click the "No" directly
+    ["mouseenter", "pointerdown", "click"].forEach(evt => {
+      noBtn.addEventListener(evt, (e) => {
+        const stageRect = stage.getBoundingClientRect();
+        const x = (e.clientX ?? (stageRect.width/2));
+        const y = (e.clientY ?? (stageRect.height/2));
+        moveNoButton(x - stageRect.left, y - stageRect.top);
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+
+    // On load, make sure "No" is positioned within stage nicely
+    window.addEventListener('load', () => {
+      // Put it a bit to the right by default
+      const stageRect = stage.getBoundingClientRect();
+      noBtn.style.left = Math.round(stageRect.width * 0.62) + "px";
+      noBtn.style.top  = Math.round(stageRect.height * 0.52) + "px";
+      noBtn.style.transform = "translate(0,0)";
+    });
+
+    // ---------- Yes flow + confetti ----------
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const closeModal = document.getElementById('closeModal');
+    const okBtn = document.getElementById('okBtn');
+    const copyBtn = document.getElementById('copyBtn');
+
+    function openModal(){
+      modalBackdrop.style.display = 'flex';
+      closeModal.focus();
+    }
+    function closeModalFn(){
+      modalBackdrop.style.display = 'none';
+      yesBtn.focus();
+    }
+
+    closeModal.addEventListener('click', closeModalFn);
+    okBtn.addEventListener('click', closeModalFn);
+    modalBackdrop.addEventListener('click', (e) => {
+      if (e.target === modalBackdrop) closeModalFn();
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      const text = "I just said YES to being your Valentine 💖";
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = "Copied! ✅";
+        setTimeout(() => (copyBtn.textContent = "Copy cute text"), 1400);
+      } catch {
+        copyBtn.textContent = "Copy failed 😅";
+        setTimeout(() => (copyBtn.textContent = "Copy cute text"), 1400);
+      }
+    });
+
+    // Confetti (tiny canvas implementation)
+    const confettiCanvas = document.getElementById('confetti');
+    const ctx = confettiCanvas.getContext('2d');
+    let confetti = [];
+    let rafId = null;
+
+    function resizeCanvas(){
+      confettiCanvas.width = window.innerWidth * devicePixelRatio;
+      confettiCanvas.height = window.innerHeight * devicePixelRatio;
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function startConfetti(){
+      resizeCanvas();
+      confettiCanvas.style.display = 'block';
+      confetti = Array.from({length: 180}, () => ({
+        x: Math.random() * window.innerWidth,
+        y: -20 - Math.random() * window.innerHeight * 0.3,
+        r: 3 + Math.random() * 5,
+        vx: -2 + Math.random() * 4,
+        vy: 2 + Math.random() * 5,
+        a: Math.random() * Math.PI * 2,
+        va: -0.15 + Math.random() * 0.3,
+        shape: Math.random() < 0.55 ? 'rect' : 'dot',
+        life: 220 + Math.random() * 140
+      }));
+
+      const loop = () => {
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+        confetti.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.02; // gravity
+          p.a += p.va;
+          p.life -= 1;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.a);
+
+          // random pastel-ish color via HSL (no fixed palette)
+          const hue = (p.x + p.y) % 360;
+          ctx.fillStyle = `hsla(${hue}, 90%, 60%, 0.95)`;
+
+          if (p.shape === 'rect') {
+            ctx.fillRect(-p.r, -p.r, p.r * 2.2, p.r * 1.4);
+          } else {
+            ctx.beginPath();
+            ctx.arc(0, 0, p.r * 0.9, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        });
+
+        confetti = confetti.filter(p => p.life > 0 && p.y < window.innerHeight + 50);
+
+        if (confetti.length > 0) {
+          rafId = requestAnimationFrame(loop);
+        } else {
+          confettiCanvas.style.display = 'none';
+          rafId = null;
+        }
+      };
+
+      if (!rafId) loop();
+    }
+
+    yesBtn.addEventListener('click', () => {
+      statusEl.textContent = "💘 confirmed";
+      startConfetti();
+      openModal();
+
+      // Make the "No" give up after Yes
+      noBtn.style.opacity = '0.15';
+      noBtn.style.pointerEvents = 'none';
+    });
+
+    // Keyboard shortcut: Y
+    window.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'y') yesBtn.click();
+      if (e.key === 'Escape' && modalBackdrop.style.display === 'flex') closeModalFn();
+    });
+  </script>
+</body>
+</html>
