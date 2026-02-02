@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -270,9 +271,97 @@
       .stage { height: 240px; }
       .ctaRow { padding-bottom: 24px; }
     }
+
+    /* --- Private Gate Styles --- */
+    #gate {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      display: grid;
+      place-items: center;
+      z-index: 100;
+    }
+
+    .gateCard {
+      background: rgba(255,255,255,0.92);
+      border-radius: 24px;
+      padding: 28px 26px;
+      width: min(420px, 92vw);
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+    }
+
+    .gateCard h2 {
+      margin: 0 0 10px;
+    }
+
+    .gateCard p {
+      color: rgba(0,0,0,0.7);
+      line-height: 1.4;
+      margin: 0 0 8px;
+    }
+
+    .gateCard input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.15);
+      font-size: 16px;
+      margin: 14px 0;
+      text-align: center;
+      outline: none;
+    }
+
+    .gateCard input:focus {
+      box-shadow: 0 0 0 4px rgba(34,197,94,.20);
+      border-color: rgba(34,197,94,.55);
+    }
+
+    .gateCard button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 999px;
+      border: none;
+      font-weight: 700;
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+      color: white;
+      cursor: pointer;
+      transition: transform .12s ease;
+    }
+
+    .gateCard button:hover { transform: translateY(-1px) scale(1.01); }
+    .gateCard button:active { transform: translateY(0) scale(0.99); }
+
+    #gateError {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #b91c1c;
+      display: none;
+    }
   </style>
 </head>
 <body>
+  <!-- Private Gate -->
+  <div id="gate">
+    <div class="gateCard">
+      <h2>💗 Private Page</h2>
+      <p>
+        This website is only designed for my gf.<br/>
+        <strong>What does my gf calls me (all small)?</strong>
+      </p>
+
+      <input
+        id="nicknameInput"
+        type="text"
+        placeholder="booboo / bloobloo / sasu / cashew"
+        autocomplete="off"
+      />
+
+      <button id="unlockBtn" type="button">Unlock 💌</button>
+      <p id="gateError">Hmm… that doesn’t sound like us 😌</p>
+    </div>
+  </div>
+
   <canvas id="confetti"></canvas>
 
   <div class="hearts" id="hearts"></div>
@@ -331,6 +420,39 @@
   </div>
 
   <script>
+    // ---------- Private Gate Logic ----------
+    const allowedNames = ["booboo", "bloobloo", "sasu", "cashew"];
+
+    const gate = document.getElementById("gate");
+    const nicknameInput = document.getElementById("nicknameInput");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const gateError = document.getElementById("gateError");
+
+    function tryUnlock() {
+      const value = nicknameInput.value.trim().toLowerCase();
+
+      if (allowedNames.includes(value)) {
+        gate.style.transition = "opacity 350ms ease";
+        gate.style.opacity = "0";
+        gate.style.pointerEvents = "none";
+        setTimeout(() => gate.remove(), 380);
+      } else {
+        gateError.style.display = "block";
+        nicknameInput.value = "";
+        nicknameInput.focus();
+      }
+    }
+
+    unlockBtn.addEventListener("click", tryUnlock);
+    nicknameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") tryUnlock();
+    });
+
+    // Focus the input immediately
+    window.addEventListener("load", () => {
+      nicknameInput.focus();
+    });
+
     // ---------- Hearts background ----------
     (function spawnHearts(){
       const hearts = document.getElementById('hearts');
@@ -597,3 +719,4 @@
   </script>
 </body>
 </html>
+```
