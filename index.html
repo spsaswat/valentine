@@ -1,9 +1,10 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Will you be my Valentine? 💌</title>
+  <title>Valentine Week 💌</title>
   <style>
     :root {
       --bg1: #ff9a9e;
@@ -70,7 +71,7 @@
       padding: 20px;
     }
     .card {
-      width: min(720px, 96vw);
+      width: min(760px, 96vw);
       background: var(--card);
       border: 1px solid rgba(255,255,255,.45);
       border-radius: 28px;
@@ -106,9 +107,9 @@
     }
 
     .content {
-      padding: 28px 24px 18px;
+      padding: 24px 24px 18px;
       display: grid;
-      gap: 18px;
+      gap: 14px;
     }
 
     h1 {
@@ -141,6 +142,7 @@
       justify-content: center;
       padding: 18px 18px 22px;
       position: relative;
+      height: 100%;
     }
 
     button {
@@ -178,6 +180,67 @@
       font-weight: 800;
     }
     .no:hover { transform: translate(-50%, -50%) scale(1.02); }
+
+    /* Valentine week panel */
+    .weekPanel {
+      border-radius: 22px;
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(0,0,0,.06);
+      padding: 14px 14px 10px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
+    }
+    .weekHeader {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      padding: 2px 4px 10px;
+    }
+    .weekHeader .title {
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .weekHeader .date {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .daysGrid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .dayItem {
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,.06);
+      background: rgba(255,255,255,.6);
+      display: grid;
+      gap: 2px;
+    }
+    .dayItem .d {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .dayItem .n {
+      font-weight: 900;
+      letter-spacing: -0.01em;
+    }
+    .dayItem .s {
+      font-size: 12px;
+      color: rgba(0,0,0,.62);
+    }
+    .dayItem.today {
+      border-color: rgba(34,197,94,.35);
+      box-shadow: 0 0 0 4px rgba(34,197,94,.18);
+      background: rgba(255,255,255,.78);
+    }
+    .dayItem.past {
+      opacity: 0.65;
+    }
+    .dayItem.future {
+      opacity: 0.95;
+    }
 
     .footer {
       padding: 0 22px 18px;
@@ -266,9 +329,9 @@
     }
 
     /* Mobile tweaks */
-    @media (max-width: 480px) {
+    @media (max-width: 520px) {
       .stage { height: 240px; }
-      .ctaRow { padding-bottom: 24px; }
+      .daysGrid { grid-template-columns: 1fr; }
     }
 
     /* --- Private Gate Styles --- */
@@ -280,7 +343,6 @@
       place-items: center;
       z-index: 100;
     }
-
     .gateCard {
       background: rgba(255,255,255,0.92);
       border-radius: 24px;
@@ -289,17 +351,12 @@
       text-align: center;
       box-shadow: 0 25px 60px rgba(0,0,0,0.25);
     }
-
-    .gateCard h2 {
-      margin: 0 0 10px;
-    }
-
+    .gateCard h2 { margin: 0 0 10px; }
     .gateCard p {
       color: rgba(0,0,0,0.7);
       line-height: 1.4;
       margin: 0 0 8px;
     }
-
     .gateCard input {
       width: 100%;
       padding: 14px 16px;
@@ -310,12 +367,10 @@
       text-align: center;
       outline: none;
     }
-
     .gateCard input:focus {
       box-shadow: 0 0 0 4px rgba(34,197,94,.20);
       border-color: rgba(34,197,94,.55);
     }
-
     .gateCard button {
       width: 100%;
       padding: 14px;
@@ -327,10 +382,8 @@
       cursor: pointer;
       transition: transform .12s ease;
     }
-
     .gateCard button:hover { transform: translateY(-1px) scale(1.01); }
     .gateCard button:active { transform: translateY(0) scale(0.99); }
-
     #gateError {
       margin-top: 12px;
       font-size: 14px;
@@ -349,20 +402,13 @@
         <strong>What does my gf calls me (all small)?</strong>
       </p>
 
-      <input
-        id="nicknameInput"
-        type="text"
-        placeholder="hmm"
-        autocomplete="off"
-      />
-
+      <input id="nicknameInput" type="text" placeholder="type here" autocomplete="off" />
       <button id="unlockBtn" type="button">Unlock 💌</button>
       <p id="gateError">Hmm… that doesn’t sound like us 😌</p>
     </div>
   </div>
 
   <canvas id="confetti"></canvas>
-
   <div class="hearts" id="hearts"></div>
 
   <div class="wrap">
@@ -380,8 +426,17 @@
           </p>
         </div>
 
+        <!-- Valentine Week (auto) -->
+        <div class="weekPanel" aria-label="Valentine week">
+          <div class="weekHeader">
+            <div class="title" id="weekTitle">Valentine Week ✨</div>
+            <div class="date" id="todayLabel">Today: —</div>
+          </div>
+          <div class="daysGrid" id="daysGrid"></div>
+        </div>
+
         <div class="stage" id="stage" aria-label="Valentine choice area">
-          <div class="ctaRow" style="height:100%;">
+          <div class="ctaRow">
             <button class="yes" id="yesBtn" type="button">Yes 😍</button>
             <button class="no" id="noBtn" type="button" aria-label="No (hard to click)">No 🙃</button>
           </div>
@@ -392,7 +447,6 @@
         <div class="hint">Tip: press <span class="kbd">Y</span> to say yes faster</div>
         <div class="hint">With love, <strong>Saswat</strong> 💘</div>
       </div>
-
     </main>
   </div>
 
@@ -421,7 +475,6 @@
   <script>
     // ---------- Private Gate Logic ----------
     const allowedNames = ["sas", "booboo", "bloobloo", "sasu", "sashu", "cashew"];
-
     const gate = document.getElementById("gate");
     const nicknameInput = document.getElementById("nicknameInput");
     const unlockBtn = document.getElementById("unlockBtn");
@@ -429,7 +482,6 @@
 
     function tryUnlock() {
       const value = nicknameInput.value.trim().toLowerCase();
-
       if (allowedNames.includes(value)) {
         gate.style.transition = "opacity 350ms ease";
         gate.style.opacity = "0";
@@ -441,16 +493,89 @@
         nicknameInput.focus();
       }
     }
-
     unlockBtn.addEventListener("click", tryUnlock);
-    nicknameInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") tryUnlock();
-    });
+    nicknameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") tryUnlock(); });
 
-    // Focus the input immediately
-    window.addEventListener("load", () => {
-      nicknameInput.focus();
-    });
+    // ---------- Valentine week schedule (auto by date) ----------
+    const events = [
+      { date: "02-07", name: "Rose Day", emoji: "🌹", note: "A rose for you, always." },
+      { date: "02-08", name: "Propose Day", emoji: "💍", note: "You + me = my favorite story." },
+      { date: "02-09", name: "Chocolate Day", emoji: "🍫", note: "Sweet like you." },
+      { date: "02-10", name: "Teddy Day", emoji: "🧸", note: "A hug in plush form." },
+      { date: "02-11", name: "Promise Day", emoji: "🤝", note: "I choose you, again and again." },
+      { date: "02-12", name: "Hug Day", emoji: "🤗", note: "Come here, my safe place." },
+      { date: "02-13", name: "Kiss Day", emoji: "😘", note: "Umma." },
+      { date: "02-14", name: "Valentine’s Day", emoji: "💘", note: "My favorite day with my favorite person." }
+    ];
+
+    function pad2(n){ return String(n).padStart(2,'0'); }
+    function fmtDate(d){
+      return `${pad2(d.getDate())} ${d.toLocaleString(undefined, { month: 'short' })} ${d.getFullYear()}`;
+    }
+    function localMidnight(d){
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
+    function buildScheduleUI(){
+      const now = new Date();
+      const today = localMidnight(now);
+      const y = today.getFullYear();
+
+      const daysGrid = document.getElementById("daysGrid");
+      const todayLabel = document.getElementById("todayLabel");
+      todayLabel.textContent = `Today: ${fmtDate(today)}`;
+
+      // Determine Feb 7 threshold for the title/CTA mode
+      const feb7 = new Date(y, 1, 7); // month is 0-based; 1 = Feb
+      const beforeFeb7 = today < feb7;
+
+      const titleEl = document.getElementById("title");
+      const subtitleEl = document.getElementById("subtitle");
+
+      if (beforeFeb7) {
+        titleEl.textContent = "Will you be my Valentine? 💌";
+        subtitleEl.textContent = "I made a tiny website just to ask you this… and yes, I’m a little dramatic.";
+      } else {
+        titleEl.textContent = "My Valentine Week with you 💘";
+        subtitleEl.textContent = "You already said yes… now let’s celebrate every day together ✨";
+      }
+
+      // render tiles
+      daysGrid.innerHTML = "";
+      events.forEach((ev) => {
+        const [mm, dd] = ev.date.split("-").map(Number);
+        const d = new Date(y, mm - 1, dd);
+        const dMid = localMidnight(d);
+
+        const state =
+          dMid.getTime() === today.getTime() ? "today" :
+          dMid < today ? "past" : "future";
+
+        const tile = document.createElement("div");
+        tile.className = `dayItem ${state}`;
+        tile.innerHTML = `
+          <div class="d">${pad2(dd)} ${d.toLocaleString(undefined, { month: 'short' })}</div>
+          <div class="n">${ev.emoji} ${ev.name}</div>
+          <div class="s">${ev.note}</div>
+        `;
+        daysGrid.appendChild(tile);
+      });
+
+      // If it is on/after Feb 7, hide the whole "No/Yes game" (accepted mode)
+      const stage = document.getElementById("stage");
+      if (!beforeFeb7) {
+        stage.style.display = "none";
+        document.getElementById("status").textContent = "💘 accepted";
+      } else {
+        stage.style.display = "block";
+      }
+    }
+
+    // Build schedule once and keep it updated if the day changes while open
+    buildScheduleUI();
+    setInterval(buildScheduleUI, 60 * 1000);
+
+    // Focus the gate input
+    window.addEventListener("load", () => { nicknameInput.focus(); });
 
     // ---------- Hearts background ----------
     (function spawnHearts(){
@@ -474,7 +599,7 @@
       }
     })();
 
-    // ---------- "No" button dodge logic ----------
+    // ---------- "No" button dodge logic (only relevant before Feb 7) ----------
     const stage = document.getElementById('stage');
     const noBtn = document.getElementById('noBtn');
     const yesBtn = document.getElementById('yesBtn');
@@ -487,31 +612,25 @@
 
     function moveNoButton(awayFromX, awayFromY) {
       const now = Date.now();
-      // Throttle moves a bit to keep it smooth
       if (now - lastMoveAt < 110) return;
       lastMoveAt = now;
 
       const stageRect = stage.getBoundingClientRect();
       const btnRect = noBtn.getBoundingClientRect();
 
-      // Available space (keep padding so it doesn't stick to edges)
       const pad = 14;
       const maxX = stageRect.width - btnRect.width - pad;
       const maxY = stageRect.height - btnRect.height - pad;
 
-      // current button position relative to stage
       const currentLeft = btnRect.left - stageRect.left;
       const currentTop  = btnRect.top - stageRect.top;
 
-      // pick a new position
-      // If we know where the pointer is, push away from it; else random.
       let targetX, targetY;
 
       if (typeof awayFromX === 'number' && typeof awayFromY === 'number') {
         const dx = currentLeft + btnRect.width/2 - awayFromX;
         const dy = currentTop + btnRect.height/2 - awayFromY;
 
-        // push direction with randomness
         const push = 120 + Math.random() * 120;
         targetX = currentLeft + (dx === 0 ? (Math.random()-0.5) : dx/Math.abs(dx)) * push + (Math.random()-0.5)*60;
         targetY = currentTop  + (dy === 0 ? (Math.random()-0.5) : dy/Math.abs(dy)) * push + (Math.random()-0.5)*60;
@@ -523,24 +642,15 @@
       targetX = clamp(targetX, pad, maxX);
       targetY = clamp(targetY, pad, maxY);
 
-      // Apply absolute position inside stage
       noBtn.style.left = targetX + 'px';
       noBtn.style.top = targetY + 'px';
       noBtn.style.transform = 'translate(0,0)';
 
       dodges++;
-      const messages = [
-        "😅 nice try",
-        "🙈 not today",
-        "🏃‍♂️ too slow",
-        "😏 you sure?",
-        "💨 zoom!",
-        "🫣 hehe"
-      ];
+      const messages = ["😅 nice try","🙈 not today","🏃‍♂️ too slow","😏 you sure?","💨 zoom!","🫣 hehe"];
       statusEl.textContent = messages[dodges % messages.length];
     }
 
-    // Trigger dodge when pointer approaches or tries to click/tap
     function pointerXY(e, rect){
       const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
       const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
@@ -556,12 +666,9 @@
       const by = (btnRect.top - stageRect.top) + btnRect.height/2;
 
       const dist = Math.hypot(bx - x, by - y);
-
-      // If cursor gets close, dodge
       if (dist < 120) moveNoButton(x, y);
     }, { passive: true });
 
-    // Mobile: dodge on touchstart near the "No" button area
     stage.addEventListener('touchstart', (e) => {
       const stageRect = stage.getBoundingClientRect();
       const {x, y} = pointerXY(e, stageRect);
@@ -577,7 +684,6 @@
       }
     }, { passive: false });
 
-    // Also dodge when user tries to hover/click the "No" directly
     ["mouseenter", "pointerdown", "click"].forEach(evt => {
       noBtn.addEventListener(evt, (e) => {
         const stageRect = stage.getBoundingClientRect();
@@ -589,9 +695,7 @@
       });
     });
 
-    // On load, make sure "No" is positioned within stage nicely
     window.addEventListener('load', () => {
-      // Put it a bit to the right by default
       const stageRect = stage.getBoundingClientRect();
       noBtn.style.left = Math.round(stageRect.width * 0.62) + "px";
       noBtn.style.top  = Math.round(stageRect.height * 0.52) + "px";
@@ -631,7 +735,6 @@
       }
     });
 
-    // Confetti (tiny canvas implementation)
     const confettiCanvas = document.getElementById('confetti');
     const ctx = confettiCanvas.getContext('2d');
     let confetti = [];
@@ -665,7 +768,7 @@
         confetti.forEach(p => {
           p.x += p.vx;
           p.y += p.vy;
-          p.vy += 0.02; // gravity
+          p.vy += 0.02;
           p.a += p.va;
           p.life -= 1;
 
@@ -673,7 +776,6 @@
           ctx.translate(p.x, p.y);
           ctx.rotate(p.a);
 
-          // random pastel-ish color via HSL (no fixed palette)
           const hue = (p.x + p.y) % 360;
           ctx.fillStyle = `hsla(${hue}, 90%, 60%, 0.95)`;
 
@@ -704,13 +806,10 @@
       statusEl.textContent = "💘 confirmed";
       startConfetti();
       openModal();
-
-      // Make the "No" give up after Yes
       noBtn.style.opacity = '0.15';
       noBtn.style.pointerEvents = 'none';
     });
 
-    // Keyboard shortcut: Y
     window.addEventListener('keydown', (e) => {
       if (e.key.toLowerCase() === 'y') yesBtn.click();
       if (e.key === 'Escape' && modalBackdrop.style.display === 'flex') closeModalFn();
