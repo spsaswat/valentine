@@ -167,7 +167,7 @@
     .yes:active { transform: translateY(0) scale(0.99); }
 
     .no {
-      position: absolute; /* we move this around */
+      position: absolute;
       left: 50%;
       top: 62%;
       transform: translate(-50%, -50%);
@@ -234,12 +234,7 @@
       box-shadow: 0 0 0 4px rgba(34,197,94,.18);
       background: rgba(255,255,255,.78);
     }
-    .dayItem.past {
-      opacity: 0.65;
-    }
-    .dayItem.future {
-      opacity: 0.95;
-    }
+    .dayItem.past { opacity: 0.65; }
 
     .footer {
       padding: 0 22px 18px;
@@ -250,11 +245,7 @@
       color: var(--muted);
       font-size: 13px;
     }
-    .hint {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .hint { display: inline-flex; align-items: center; gap: 8px; }
     .kbd {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-weight: 700;
@@ -295,11 +286,7 @@
       align-items: center;
       gap: 10px;
     }
-    .modalHeader h2 {
-      margin: 0;
-      font-size: 18px;
-      letter-spacing: -0.01em;
-    }
+    .modalHeader h2 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
     .modalBody {
       padding: 18px 20px 6px;
       color: rgba(0,0,0,.7);
@@ -327,7 +314,6 @@
       display: none;
     }
 
-    /* Mobile tweaks */
     @media (max-width: 520px) {
       .stage { height: 240px; }
       .daysGrid { grid-template-columns: 1fr; }
@@ -425,7 +411,7 @@
           </p>
         </div>
 
-        <!-- Valentine Week (auto) -->
+        <!-- Valentine Week (auto, but reveals day-by-day) -->
         <div class="weekPanel" aria-label="Valentine week">
           <div class="weekHeader">
             <div class="title" id="weekTitle">Valentine Week ✨</div>
@@ -434,6 +420,7 @@
           <div class="daysGrid" id="daysGrid"></div>
         </div>
 
+        <!-- Pre-Feb7: show proposal buttons; Feb7+: hidden (accepted mode) -->
         <div class="stage" id="stage" aria-label="Valentine choice area">
           <div class="ctaRow">
             <button class="yes" id="yesBtn" type="button">Yes 😍</button>
@@ -472,6 +459,20 @@
   </div>
 
   <script>
+    // =========================
+    // TEST DIFFERENT DATES
+    // =========================
+    // Set this to something like "2026-02-07" to test.
+    // Leave as null to use the real current date.
+    const DEBUG_DATE_ISO = null; // e.g. "2026-02-07"
+
+    function getNow(){
+      if (!DEBUG_DATE_ISO) return new Date();
+      // local noon avoids timezone edge cases
+      const [y,m,d] = DEBUG_DATE_ISO.split("-").map(Number);
+      return new Date(y, m-1, d, 12, 0, 0);
+    }
+
     // ---------- Private Gate Logic ----------
     const allowedNames = ["sas", "booboo", "bloobloo", "sasu", "sashu", "cashew"];
     const gate = document.getElementById("gate");
@@ -495,7 +496,7 @@
     unlockBtn.addEventListener("click", tryUnlock);
     nicknameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") tryUnlock(); });
 
-    // ---------- Valentine week schedule (auto by date) ----------
+    // ---------- Valentine schedule: reveal only up to today ----------
     const events = [
       { date: "02-07", name: "Rose Day", emoji: "🌹", note: "A rose for you, always." },
       { date: "02-08", name: "Propose Day", emoji: "💍", note: "You + me = my favorite story." },
@@ -514,67 +515,72 @@
     function localMidnight(d){
       return new Date(d.getFullYear(), d.getMonth(), d.getDate());
     }
+
     function buildScheduleUI(){
-      const now = new Date();
+      const now = getNow();
       const today = localMidnight(now);
       const y = today.getFullYear();
 
       const daysGrid = document.getElementById("daysGrid");
       const todayLabel = document.getElementById("todayLabel");
-      todayLabel.textContent = `Today: ${fmtDate(today)}`;
-
-      // Determine Feb 7 threshold for the title/CTA mode
-      const feb7 = new Date(y, 1, 7); // month is 0-based; 1 = Feb
-      const beforeFeb7 = today < feb7;
-
       const titleEl = document.getElementById("title");
       const subtitleEl = document.getElementById("subtitle");
+      const stageEl = document.getElementById("stage");
+      const statusEl = document.getElementById("status");
+
+      todayLabel.textContent = `Today: ${fmtDate(today)}`;
+
+      const feb7 = new Date(y, 1, 7); // Feb 7
+      const beforeFeb7 = today < feb7;
 
       if (beforeFeb7) {
         titleEl.textContent = "Will you be my Valentine? 💌";
         subtitleEl.textContent = "I made a tiny website just to ask you this… and yes, I’m a little dramatic.";
+        stageEl.style.display = "block";
+        statusEl.textContent = "💗 ready";
       } else {
         titleEl.textContent = "My Valentine Week with you 💘";
-        subtitleEl.textContent = "You already said yes… now let’s celebrate every day together ✨";
+        subtitleEl.textContent = "You already said yes… now let’s celebrate one day at a time ✨";
+        stageEl.style.display = "none";
+        statusEl.textContent = "💘 accepted";
       }
 
-      // render tiles
+      // Show ONLY days up to today
       daysGrid.innerHTML = "";
-      events.forEach((ev) => {
-        const [mm, dd] = ev.date.split("-").map(Number);
-        const d = new Date(y, mm - 1, dd);
-        const dMid = localMidnight(d);
 
-        const state =
-          dMid.getTime() === today.getTime() ? "today" :
-          dMid < today ? "past" : "future";
+      const tilesToShow = events
+        .map(ev => {
+          const [mm, dd] = ev.date.split("-").map(Number);
+          const d = new Date(y, mm - 1, dd);
+          return { ...ev, d: localMidnight(d) };
+        })
+        .filter(ev => ev.d <= today)
+        .sort((a, b) => a.d - b.d);
 
+      // If before Feb 7, keep empty (so nothing reveals yet)
+      if (beforeFeb7) return;
+
+      tilesToShow.forEach((ev) => {
+        const state = ev.d.getTime() === today.getTime() ? "today" : "past";
         const tile = document.createElement("div");
         tile.className = `dayItem ${state}`;
         tile.innerHTML = `
-          <div class="d">${pad2(dd)} ${d.toLocaleString(undefined, { month: 'short' })}</div>
+          <div class="d">${pad2(ev.d.getDate())} ${ev.d.toLocaleString(undefined, { month: 'short' })}</div>
           <div class="n">${ev.emoji} ${ev.name}</div>
           <div class="s">${ev.note}</div>
         `;
         daysGrid.appendChild(tile);
       });
-
-      // If it is on/after Feb 7, hide the whole "No/Yes game" (accepted mode)
-      const stage = document.getElementById("stage");
-      if (!beforeFeb7) {
-        stage.style.display = "none";
-        document.getElementById("status").textContent = "💘 accepted";
-      } else {
-        stage.style.display = "block";
-      }
     }
 
-    // Build schedule once and keep it updated if the day changes while open
-    buildScheduleUI();
-    setInterval(buildScheduleUI, 60 * 1000);
+    // Focus gate input + build UI
+    window.addEventListener("load", () => {
+      nicknameInput.focus();
+      buildScheduleUI();
+    });
 
-    // Focus the gate input
-    window.addEventListener("load", () => { nicknameInput.focus(); });
+    // Update every minute (in case date changes while open)
+    setInterval(buildScheduleUI, 60 * 1000);
 
     // ---------- Hearts background ----------
     (function spawnHearts(){
@@ -598,7 +604,7 @@
       }
     })();
 
-    // ---------- "No" button dodge logic (only relevant before Feb 7) ----------
+    // ---------- "No" button dodge logic ----------
     const stage = document.getElementById('stage');
     const noBtn = document.getElementById('noBtn');
     const yesBtn = document.getElementById('yesBtn');
@@ -606,7 +612,6 @@
 
     let dodges = 0;
     let lastMoveAt = 0;
-
     function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
     function moveNoButton(awayFromX, awayFromY) {
